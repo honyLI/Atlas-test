@@ -1,0 +1,46 @@
+--- original/include/CSV/csv.hpp	2025-03-19 12:19:13.750820321 +0000
++++ AIFM/include/CSV/csv.hpp	2025-03-19 12:19:13.734820663 +0000
+@@ -32,6 +32,9 @@
+ #ifndef CSV_H
+ #define CSV_H
+ 
++#include "dataframe_vector.hpp"
++#include "deref_scope.hpp"
++#include "manager.hpp"
+ #include "simple_time.hpp"
+ 
+ #include <algorithm>
+@@ -1362,22 +1365,29 @@
+ };
+ 
+ template <typename... ColTypes, typename... Strs>
+-std::tuple<std::vector<ColTypes>...> parse_csv_to_vectors(std::string csv_file_path,
+-                                                          Strs... col_names)
++std::tuple<far_memory::DataFrameVector<ColTypes>...> parse_csv_to_vectors(
++    far_memory::FarMemManager* manager, std::string csv_file_path, Strs... col_names)
+ {
+     io::CSVReader<sizeof...(col_names), io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(
+         csv_file_path);
+     in.read_header(io::ignore_extra_column, col_names...);
+     std::tuple<ColTypes...> col_fields;
+-    std::tuple<std::vector<ColTypes>...> col_vecs;
++    auto col_vecs     = std::make_tuple(manager->allocate_dataframe_vector<ColTypes>()...);
++    far_memory::DerefScope scope;
++    uint64_t num_rows = 0;
++    constexpr uint64_t kNumRowsPerScope = 1024;
+     while (std::apply([&](auto&... fields) { return in.read_row(fields...); }, col_fields)) {
++        if (unlikely(((num_rows++) % kNumRowsPerScope) == 0)) {
++            scope.renew();
++        }
+         auto seq = std::index_sequence_for<ColTypes...>{};
+         [&]<typename T, T... ints>(std::integer_sequence<T, ints...> int_seq)
+         {
+-            ((std::get<ints>(col_vecs).push_back(std::get<ints>(col_fields))), ...);
++            ((std::get<ints>(col_vecs).push_back(scope, std::get<ints>(col_fields))), ...);
+         }
+         (seq);
+     }
++    std::apply([&](auto&... vecs) { (vecs.flush(), ...); }, col_vecs);
+     return col_vecs;
+ }
+ 

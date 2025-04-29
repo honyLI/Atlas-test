@@ -1,0 +1,43 @@
+{
+  "url": "https://api.github.com/repos/cpp-pm/hunter/releases/185628503",
+  "assets_url": "https://api.github.com/repos/cpp-pm/hunter/releases/185628503/assets",
+  "upload_url": "https://uploads.github.com/repos/cpp-pm/hunter/releases/185628503/assets{?name,label}",
+  "html_url": "https://github.com/cpp-pm/hunter/releases/tag/v0.25.8",
+  "id": 185628503,
+  "author": {
+    "login": "NeroBurner",
+    "id": 9076163,
+    "node_id": "MDQ6VXNlcjkwNzYxNjM=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/9076163?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/NeroBurner",
+    "html_url": "https://github.com/NeroBurner",
+    "followers_url": "https://api.github.com/users/NeroBurner/followers",
+    "following_url": "https://api.github.com/users/NeroBurner/following{/other_user}",
+    "gists_url": "https://api.github.com/users/NeroBurner/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/NeroBurner/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/NeroBurner/subscriptions",
+    "organizations_url": "https://api.github.com/users/NeroBurner/orgs",
+    "repos_url": "https://api.github.com/users/NeroBurner/repos",
+    "events_url": "https://api.github.com/users/NeroBurner/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/NeroBurner/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "node_id": "RE_kwDODClGW84LEHdX",
+  "tag_name": "v0.25.8",
+  "target_commitish": "master",
+  "name": "v0.25.8",
+  "draft": false,
+  "prerelease": false,
+  "created_at": "2024-11-15T12:59:56Z",
+  "published_at": "2024-11-15T13:03:16Z",
+  "assets": [
+
+  ],
+  "tarball_url": "https://api.github.com/repos/cpp-pm/hunter/tarball/v0.25.8",
+  "zipball_url": "https://api.github.com/repos/cpp-pm/hunter/zipball/v0.25.8",
+  "body": "## What's Changed\r\n* OpenCV and dependencies update to v4.10.0-p0 by @NeroBurner in https://github.com/cpp-pm/hunter/pull/764\r\n\r\n\r\n**Full Changelog**: https://github.com/cpp-pm/hunter/compare/v0.25.7...v0.25.8\r\n\r\n```cmake\r\nHunterGate(\r\n    URL \"https://github.com/cpp-pm/hunter/archive/v0.25.8.tar.gz\"\r\n    SHA1 \"26c79d587883ec910bce168e25f6ac4595f97033\"\r\n)\r\n```",
+  "mentions_count": 1
+}

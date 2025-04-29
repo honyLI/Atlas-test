@@ -1,0 +1,171 @@
+--- original/include/DataFrame/Internals/DataFrame_misc.tcc	2025-03-19 12:19:13.750820321 +0000
++++ AIFM/include/DataFrame/Internals/DataFrame_misc.tcc	2025-03-19 12:19:13.734820663 +0000
+@@ -50,7 +50,7 @@
+     using ValueType =
+         typename std::remove_reference<decltype(vec)>::type::value_type;
+ 
+-    vec.resize(size, ValueType());
++    vec.resize(size);
+ }
+ 
+ // ----------------------------------------------------------------------------
+@@ -79,8 +79,7 @@
+ void
+ DataFrame<I, H>::sort_functor_<Ts ...>::operator() (T2 &vec)  {
+ 
+-    sorted_idxs_copy = sorted_idxs;
+-    _sort_by_sorted_index_(vec, sorted_idxs_copy, idx_s);
++    _sort_by_sorted_index_(manager, vec, sorted_idxs, idx_s);
+     return;
+ }
+ 
+@@ -98,8 +97,11 @@
+     const size_type col_s = vec.size() >= end ? end : vec.size();
+ 
+     df.template load_column<ValueType>(
++        manager,
+         name,
+-        { vec.begin() + begin, vec.begin() + col_s },
++        Index2D<decltype(vec.cbegin())> {
++			    .begin = vec.cbegin() + begin,
++			    .end = vec.cbegin() + col_s },
+         nan_p);
+ }
+ 
+@@ -162,43 +164,40 @@
+     using VecType = typename std::remove_reference<T>::type;
+     using ValueType = typename VecType::value_type;
+ 
+-    df.create_column<ValueType>(name);
++    df.create_column<ValueType>(manager, name);
+     return;
+ }
+ 
+ // ----------------------------------------------------------------------------
+ 
+ template<typename I, typename H>
+-template<typename F, typename ... Ts>
+-template<typename T>
++template<typename T, typename F, typename ... Ts>
++template<typename U>
+ void
+-DataFrame<I, H>::groupby_functor_<F, Ts ...>::operator() (const T &vec)  {
++DataFrame<I, H>::groupby_functor_<T, F, Ts ...>::operator() (const U &vec)  {
+ 
+-    if (! ::strcmp(name, DF_INDEX_COL_NAME))  {
+-        auto    visitor = functor.template get_aggregator<I, I>();
++    auto agg_vec = manager->allocate_dataframe_vector<typename U::value_type>();
+ 
+-        visitor.pre();
+-        visitor(index_vec.begin() + begin, index_vec.begin() + end,
+-                index_vec.begin() + begin, index_vec.begin() + end);
+-        visitor.post();
++    if constexpr (std::is_same<F, GroupbyMax>::value) {
++        agg_vec = const_cast<U *>(&vec)->aggregate_max(manager, key_vec);
++    } else if constexpr (std::is_same<F, GroupbyMin>::value) {
++        agg_vec = const_cast<U *>(&vec)->aggregate_min(manager, key_vec);
++    } else if constexpr (std::is_same<F, GroupbyMedian>::value) {
++        agg_vec = const_cast<U *>(&vec)->aggregate_median(manager, key_vec);
++    } else {
++        BUG();
++    }
+ 
+-        df.append_index(visitor.get_result());
++    if (! ::strcmp(name, DF_INDEX_COL_NAME))  {
++        // If condition is always hold; it is used to avoid compilation errors when vec
++        // is not index vector,
++        if constexpr (std::is_same<I, typename decltype(agg_vec)::value_type>::value) {
++            df.load_index(std::move(agg_vec));
++        }
+     }
+     else  {
+-        using VecType = typename std::remove_reference<T>::type;
+-        using ValueType = typename VecType::value_type;
+-
+-        auto                visitor =
+-            functor.template get_aggregator<ValueType, I>();
+-        const std::size_t   vec_end = std::min(end, vec.size());
+-
+-        visitor.pre();
+-        visitor(index_vec.begin() + begin, index_vec.begin() + vec_end,
+-                vec.begin() + begin, vec.begin() + vec_end);
+-        visitor.post();
+-
+-        df.append_column<ValueType>(name, visitor.get_result(),
+-                                    nan_policy::dont_pad_with_nans);
++        df.load_column<typename U::value_type>(manager, name, std::move(agg_vec),
++                                               nan_policy::dont_pad_with_nans);
+     }
+     return;
+ }
+@@ -291,8 +290,18 @@
+         else
+             os << "<N/A>:";
+     }
+-    for (std::size_t i = 0; i < vec.size(); ++i)
+-        os << vec[i] << ',';
++
++    far_memory::DerefScope scope;
++    constexpr uint64_t kNumElementsPerScope = 1024;
++    auto* _vec                              = const_cast<T*>(&vec);
++    auto it                                 = _vec->cfbegin(scope);
++    for (std::size_t i = 0; i < vec.size(); ++i, ++it) {
++        if (unlikely(i % kNumElementsPerScope == 0)) {
++            scope.renew();
++            it.renew(scope);
++        }
++        os << *it << ',';
++	}
+     os << '\n';
+ 
+     return;
+@@ -351,10 +360,18 @@
+ 
+     os << "\"D\":[";
+     if (! vec.empty())  {
+-        _write_json_df_index_(os, vec[0]);
+-        for (std::size_t i = 1; i < vec.size(); ++i)  {
++        far_memory::DerefScope scope;
++        constexpr uint64_t kNumElementsPerScope = 1024;
++        auto* _vec                              = const_cast<T*>(&vec);
++        auto it                                 = _vec->cfbegin(scope);
++        _write_json_df_index_(os, *it);
++        for (std::size_t i = 1; i < vec.size(); ++i, ++it)  {
++            if (unlikely(i % kNumElementsPerScope == 0)) {
++                scope.renew();
++                it.renew(scope);
++            }
+             os << ',';
+-            _write_json_df_index_(os, vec[i]);
++            _write_json_df_index_(os, *it);
+         }
+     }
+     os << "]}";
+@@ -671,22 +688,12 @@
+ void
+ DataFrame<I, H>::
+ sel_load_functor_<IT, Ts ...>::
+-operator() (const std::vector<T> &vec)  {
+-
+-    std::vector<T>  new_col;
+-    const size_type vec_size = vec.size();
+-
+-    new_col.reserve(std::min(sel_indices.size(), vec_size));
+-    for (const auto citer : sel_indices)  {
+-        const size_type index =
+-            citer >= 0 ? citer : static_cast<IT>(indices_size) + citer;
++operator() (const far_memory::DataFrameVector<T> &vec)  {
+ 
+-        if (index < vec_size)
+-            new_col.push_back(vec[index]);
+-        else
+-            break;
+-    }
+-    df.load_column(name, std::move(new_col), nan_policy::dont_pad_with_nans);
++    auto new_col = const_cast<far_memory::DataFrameVector<T>*>(&vec)->
++        copy_data_by_idx(manager, sel_indices);
++    df.load_column<T>(manager, name, std::move(new_col),
++					  nan_policy::dont_pad_with_nans);
+     return;
+ }
+ 

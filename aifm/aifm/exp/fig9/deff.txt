@@ -1,0 +1,59 @@
+34c34
+<   constexpr static uint64_t kCacheSize = 2048 * Region::kSize;
+---
+>   constexpr static uint64_t kCacheSize = 16384 * Region::kSize;
+39,40c39,42
+<   constexpr static uint32_t kLocalHashTableNumEntriesShift = 27;
+<   constexpr static uint32_t kRemoteHashTableNumEntriesShift = 28;
+---
+>   constexpr static uint32_t kLocalHashTableNumEntriesShift =
+>       28; // 128 M entries
+>   constexpr static uint32_t kRemoteHashTableNumEntriesShift =
+>       27; // 128 M entries
+46d47
+<   constexpr static uint32_t kNumConnections = 650;
+191c192
+< 	    scope.renew();
+---
+>             scope.renew();
+219,223c220,222
+<   void run(netaddr raddr) {
+<     BUG_ON(madvise(all_gen_keys, sizeof(all_gen_keys), MADV_HUGEPAGE) != 0);
+<     manager.reset(FarMemManagerFactory::build(
+<         kCacheSize, kNumGCThreads,
+<         new TCPDevice(raddr, kNumConnections, kFarMemSize)));
+---
+>   void run() {
+>     manager.reset(FarMemManagerFactory::build(kCacheSize, kNumGCThreads,
+>                                               new FakeDevice(kFarMemSize)));
+238d236
+< int argc;
+240,243c238,239
+< void my_main(void *arg) {
+<   char **argv = (char **)arg;
+<   std::string ip_addr_port(argv[1]);
+<   test.run(helpers::str_to_netaddr(ip_addr_port));
+---
+> void my_main(void *argv) {
+>   test.run();
+246c242
+< int main(int _argc, char *argv[]) {
+---
+> int main(int argc, char *argv[]) {
+249,250c245,246
+<   if (_argc < 3) {
+<     std::cerr << "usage: [cfg_file] [ip_addr:port]" << std::endl;
+---
+>   if (argc < 2) {
+>     std::cerr << "usage: [cfg_file]" << std::endl;
+254,261c250
+<   char conf_path[strlen(argv[1]) + 1];
+<   strcpy(conf_path, argv[1]);
+<   for (int i = 2; i < _argc; i++) {
+<     argv[i - 1] = argv[i];
+<   }
+<   argc = _argc - 1;
+< 
+<   ret = runtime_init(conf_path, my_main, argv);
+---
+>   ret = runtime_init(argv[1], my_main, NULL);

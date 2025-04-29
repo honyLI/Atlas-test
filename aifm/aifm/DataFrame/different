@@ -1,0 +1,1666 @@
+Only in original/app: main.cc
+Only in AIFM/app: main_fake.cc
+Only in AIFM/app: main_tcp.cc
+diff -r AIFM/CMakeLists.txt original/CMakeLists.txt
+8,12c8
+< set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fconcepts -Wno-subobject-linkage")
+< 
+< if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+<         add_definitions(-DDEBUG)
+< endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+---
+> set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fconcepts")
+56,57c52,53
+< set(CMAKE_C_EXTENSIONS ON)
+< set(CMAKE_CXX_EXTENSIONS ON)
+---
+> set(CMAKE_C_EXTENSIONS OFF)
+> set(CMAKE_CXX_EXTENSIONS OFF)
+89,92d84
+< include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../inc/)
+< include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../shenango/bindings/cc/)
+< include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../shenango/inc/)
+< 
+129,152d120
+< # Link Shenango.
+< link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../shenango/bindings/cc/)
+< link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../shenango/)
+< link_libraries(rt++ runtime net base)
+< 
+< # Linker script.
+< set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -T${CMAKE_CURRENT_SOURCE_DIR}/../../../shenango/base/base.ld")
+< 
+< # Link AIFM.
+< link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../)
+< link_libraries(aifm)
+< 
+< # Link Pthread.
+< link_libraries(pthread)
+< 
+< # Link RDMA.
+< link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../shenango/rdma-core/build/lib/statics)
+< link_libraries(mlx5 ibverbs)
+< 
+< # Link netlink.
+< link_libraries(nl-3 nl-route-3)
+< 
+< # Link libnuma.
+< link_libraries(numa)
+256,257c224
+< add_executable(main_tcp app/main_tcp.cc)
+< add_executable(main_fake app/main_fake.cc)
+---
+> add_executable(main  app/main.cc)
+260,261c227
+< target_link_libraries(main_tcp DataFrame)
+< target_link_libraries(main_fake DataFrame)
+---
+> target_link_libraries(main DataFrame)
+264,386c230,354
+< #add_executable(dataframe_tester  test/dataframe_tester.cc)
+< #add_executable(dataframe_tester_2  test/dataframe_tester_2.cc)
+< #add_executable(dataframe_performance  test/dataframe_performance.cc)
+< #add_executable(vectors_tester    test/vectors_tester.cc)
+< #add_executable(vector_ptr_view_tester test/vector_ptr_view_tester.cc)
+< #add_executable(date_time_tester  test/date_time_tester.cc)
+< #add_executable(gen_rand_tester  test/gen_rand_tester.cc)
+< 
+< # # Link the DataFrame library to the test binary
+< # target_link_libraries(dataframe_tester DataFrame)
+< 
+< # # Link the DataFrame library to the test binary
+< # target_link_libraries(dataframe_tester_2 DataFrame)
+< 
+< # # Link the DataFrame library to the test binary
+< # target_link_libraries(dataframe_performance DataFrame)
+< 
+< # # Link the DataFrame library to the test binary
+< # target_link_libraries(vectors_tester DataFrame)
+< 
+< # # Link the DataFrame library to the test binary
+< # target_link_libraries(vector_ptr_view_tester DataFrame)
+< 
+< # # Link the DataFrame library to the test binary
+< # target_link_libraries(date_time_tester DataFrame)
+< 
+< # # Link the DataFrame library to the test binary
+< # target_link_libraries(gen_rand_tester DataFrame)
+< 
+< # if (UNIX)
+< #   find_package(Threads REQUIRED)
+< #   target_link_libraries(main Threads::Threads)
+< #   target_link_libraries(dataframe_tester Threads::Threads)
+< #   target_link_libraries(dataframe_tester_2 Threads::Threads)
+< #   target_link_libraries(dataframe_performance Threads::Threads)
+< #   target_link_libraries(vectors_tester Threads::Threads)
+< #   target_link_libraries(vector_ptr_view_tester Threads::Threads)
+< #   target_link_libraries(date_time_tester Threads::Threads)
+< #   target_link_libraries(gen_rand_tester Threads::Threads)
+< # endif (UNIX)
+< 
+< # if (UNIX AND NOT APPLE)
+< #   target_link_libraries(main rt)
+< #   target_link_libraries(dataframe_tester rt)
+< #   target_link_libraries(dataframe_tester_2 rt)
+< #   target_link_libraries(dataframe_performance rt)
+< #   target_link_libraries(vectors_tester rt)
+< #   target_link_libraries(vector_ptr_view_tester rt)
+< #   target_link_libraries(date_time_tester rt)
+< #   target_link_libraries(gen_rand_tester rt)
+< # endif()
+< 
+< # # Enable ctest, testing so we can see if unit tests pass or fail in CI
+< # enable_testing()
+< # add_test(NAME dataframe_tester
+< #          COMMAND dataframe_tester
+< #          WORKING_DIRECTORY $<TARGET_FILE_DIR:dataframe_tester>)
+< 
+< # # For some unknown reason to me, these tests sigfaults in AppVeyor
+< # #
+< # if (NOT MSVC)
+< #   add_test(NAME dataframe_tester_2
+< #            COMMAND dataframe_tester_2
+< #            WORKING_DIRECTORY $<TARGET_FILE_DIR:dataframe_tester_2>)
+< 
+< #   add_test(NAME vectors_tester
+< #            COMMAND vectors_tester
+< #            WORKING_DIRECTORY $<TARGET_FILE_DIR:vectors_tester>)
+< # endif(NOT MSVC)
+< 
+< # add_test(NAME vector_ptr_view_tester
+< #          COMMAND vector_ptr_view_tester
+< #          WORKING_DIRECTORY $<TARGET_FILE_DIR:vector_ptr_view_tester>)
+< # add_test(NAME date_time_tester
+< #          COMMAND date_time_tester
+< #          WORKING_DIRECTORY $<TARGET_FILE_DIR:date_time_tester>)
+< 
+< # add_test(NAME gen_rand_tester
+< #          COMMAND gen_rand_tester
+< #          WORKING_DIRECTORY $<TARGET_FILE_DIR:gen_rand_tester>)
+< 
+< # message("-- Copying files for testing")
+< # # Ctest require this files in the build dir, on all platforms
+< # add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+< #                    COMMAND ${CMAKE_COMMAND} -E copy
+< #                    ${CMAKE_CURRENT_SOURCE_DIR}/test/standard.csv
+< #                    ${CMAKE_CURRENT_BINARY_DIR}/standard.csv)
+< # add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+< #                    COMMAND ${CMAKE_COMMAND} -E copy
+< #                    ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+< #                    ${CMAKE_CURRENT_BINARY_DIR}/sample_data.csv)
+< # add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+< #                    COMMAND ${CMAKE_COMMAND} -E copy
+< #                    ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+< #                    ${CMAKE_CURRENT_BINARY_DIR}/sample_data.json)
+< # add_custom_command(
+< #     TARGET ${PROJECT_NAME} POST_BUILD
+< #     COMMAND ${CMAKE_COMMAND} -E copy
+< #     ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+< #     ${CMAKE_CURRENT_BINARY_DIR}/sample_data_dt_index.csv)
+< # add_custom_command(
+< #     TARGET ${PROJECT_NAME} POST_BUILD
+< #     COMMAND ${CMAKE_COMMAND} -E copy
+< #     ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+< #     ${CMAKE_CURRENT_BINARY_DIR}/sample_data_string_index.csv)
+< 
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+< # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+< #           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+< # message("-- Copying files for testing - done")
+---
+> add_executable(dataframe_tester  test/dataframe_tester.cc)
+> add_executable(dataframe_tester_2  test/dataframe_tester_2.cc)
+> add_executable(dataframe_performance  test/dataframe_performance.cc)
+> add_executable(vectors_tester    test/vectors_tester.cc)
+> add_executable(vector_ptr_view_tester test/vector_ptr_view_tester.cc)
+> add_executable(date_time_tester  test/date_time_tester.cc)
+> add_executable(gen_rand_tester  test/gen_rand_tester.cc)
+> 
+> # Link the DataFrame library to the test binary
+> target_link_libraries(dataframe_tester DataFrame)
+> 
+> # Link the DataFrame library to the test binary
+> target_link_libraries(dataframe_tester_2 DataFrame)
+> 
+> # Link the DataFrame library to the test binary
+> target_link_libraries(dataframe_performance DataFrame)
+> 
+> # Link the DataFrame library to the test binary
+> target_link_libraries(vectors_tester DataFrame)
+> 
+> # Link the DataFrame library to the test binary
+> target_link_libraries(vector_ptr_view_tester DataFrame)
+> 
+> # Link the DataFrame library to the test binary
+> target_link_libraries(date_time_tester DataFrame)
+> 
+> # Link the DataFrame library to the test binary
+> target_link_libraries(gen_rand_tester DataFrame)
+> 
+> if (UNIX)
+>   # Find pthreads library
+>   set(THREADS_PREFER_PTHREAD_FLAG ON)
+>   find_package(Threads REQUIRED)
+>   target_link_libraries(main Threads::Threads)
+>   target_link_libraries(dataframe_tester Threads::Threads)
+>   target_link_libraries(dataframe_tester_2 Threads::Threads)
+>   target_link_libraries(dataframe_performance Threads::Threads)
+>   target_link_libraries(vectors_tester Threads::Threads)
+>   target_link_libraries(vector_ptr_view_tester Threads::Threads)
+>   target_link_libraries(date_time_tester Threads::Threads)
+>   target_link_libraries(gen_rand_tester Threads::Threads)
+> endif (UNIX)
+> 
+> if (UNIX AND NOT APPLE)
+>   target_link_libraries(main rt)
+>   target_link_libraries(dataframe_tester rt)
+>   target_link_libraries(dataframe_tester_2 rt)
+>   target_link_libraries(dataframe_performance rt)
+>   target_link_libraries(vectors_tester rt)
+>   target_link_libraries(vector_ptr_view_tester rt)
+>   target_link_libraries(date_time_tester rt)
+>   target_link_libraries(gen_rand_tester rt)
+> endif()
+> 
+> # Enable ctest, testing so we can see if unit tests pass or fail in CI
+> enable_testing()
+> add_test(NAME dataframe_tester
+>          COMMAND dataframe_tester
+>          WORKING_DIRECTORY $<TARGET_FILE_DIR:dataframe_tester>)
+> 
+> # For some unknown reason to me, these tests sigfaults in AppVeyor
+> #
+> if (NOT MSVC)
+>   add_test(NAME dataframe_tester_2
+>            COMMAND dataframe_tester_2
+>            WORKING_DIRECTORY $<TARGET_FILE_DIR:dataframe_tester_2>)
+> 
+>   add_test(NAME vectors_tester
+>            COMMAND vectors_tester
+>            WORKING_DIRECTORY $<TARGET_FILE_DIR:vectors_tester>)
+> endif(NOT MSVC)
+> 
+> add_test(NAME vector_ptr_view_tester
+>          COMMAND vector_ptr_view_tester
+>          WORKING_DIRECTORY $<TARGET_FILE_DIR:vector_ptr_view_tester>)
+> add_test(NAME date_time_tester
+>          COMMAND date_time_tester
+>          WORKING_DIRECTORY $<TARGET_FILE_DIR:date_time_tester>)
+> 
+> add_test(NAME gen_rand_tester
+>          COMMAND gen_rand_tester
+>          WORKING_DIRECTORY $<TARGET_FILE_DIR:gen_rand_tester>)
+> 
+> message("-- Copying files for testing")
+> # Ctest require this files in the build dir, on all platforms
+> add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+>                    COMMAND ${CMAKE_COMMAND} -E copy
+>                    ${CMAKE_CURRENT_SOURCE_DIR}/test/standard.csv
+>                    ${CMAKE_CURRENT_BINARY_DIR}/standard.csv)
+> add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+>                    COMMAND ${CMAKE_COMMAND} -E copy
+>                    ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+>                    ${CMAKE_CURRENT_BINARY_DIR}/sample_data.csv)
+> add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+>                    COMMAND ${CMAKE_COMMAND} -E copy
+>                    ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+>                    ${CMAKE_CURRENT_BINARY_DIR}/sample_data.json)
+> add_custom_command(
+>     TARGET ${PROJECT_NAME} POST_BUILD
+>     COMMAND ${CMAKE_COMMAND} -E copy
+>     ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+>     ${CMAKE_CURRENT_BINARY_DIR}/sample_data_dt_index.csv)
+> add_custom_command(
+>     TARGET ${PROJECT_NAME} POST_BUILD
+>     COMMAND ${CMAKE_COMMAND} -E copy
+>     ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+>     ${CMAKE_CURRENT_BINARY_DIR}/sample_data_string_index.csv)
+> 
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+> file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+>           DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+> message("-- Copying files for testing - done")
+diff -r AIFM/include/CSV/csv.hpp original/include/CSV/csv.hpp
+35,37d34
+< #include "dataframe_vector.hpp"
+< #include "deref_scope.hpp"
+< #include "manager.hpp"
+1368,1369c1365,1366
+< std::tuple<far_memory::DataFrameVector<ColTypes>...> parse_csv_to_vectors(
+<     far_memory::FarMemManager* manager, std::string csv_file_path, Strs... col_names)
+---
+> std::tuple<std::vector<ColTypes>...> parse_csv_to_vectors(std::string csv_file_path,
+>                                                           Strs... col_names)
+1375,1378c1372
+<     auto col_vecs     = std::make_tuple(manager->allocate_dataframe_vector<ColTypes>()...);
+<     far_memory::DerefScope scope;
+<     uint64_t num_rows = 0;
+<     constexpr uint64_t kNumRowsPerScope = 1024;
+---
+>     std::tuple<std::vector<ColTypes>...> col_vecs;
+1380,1382d1373
+<         if (unlikely(((num_rows++) % kNumRowsPerScope) == 0)) {
+<             scope.renew();
+<         }
+1386c1377
+<             ((std::get<ints>(col_vecs).push_back(scope, std::get<ints>(col_fields))), ...);
+---
+>             ((std::get<ints>(col_vecs).push_back(std::get<ints>(col_fields))), ...);
+1390d1380
+<     std::apply([&](auto&... vecs) { (vecs.flush(), ...); }, col_vecs);
+diff -r AIFM/include/DataFrame/DataFrame.h original/include/DataFrame/DataFrame.h
+32,33d31
+< #include "manager.hpp"
+< 
+85c83
+<     DataFrame(far_memory::FarMemManager *manager);
+---
+>     DataFrame() = default;
+101c99
+<     IndexVecType    indices_;        // Vector
+---
+>     IndexVecType    indices_ { };    // Vector
+122,123c120,121
+< 	far_memory::DataFrameVector<T> &
+< 	create_column(far_memory::FarMemManager *manager, const char *name);
+---
+>     std::vector<T> &
+>     create_column(const char *name);
+175,176c173
+<     load_data(far_memory::FarMemManager *manager, IndexVecType &&indices,
+<               Ts&& ... args);
+---
+>     load_data(IndexVecType &&indices, Ts&& ... args);
+210,212c207,208
+<     load_column(far_memory::FarMemManager *manager,
+<                 const char *name,
+<                 Index2D<const ITR> range,
+---
+>     load_column(const char *name,
+>                 Index2D<const ITR &> range,
+231,232c227,228
+< 	load_column(far_memory::FarMemManager *manager, const char *name,
+<                 far_memory::DataFrameVector<T> &&data,
+---
+>     load_column(const char *name,
+>                 std::vector<T> &&data,
+237,238c233,234
+< 	load_column(far_memory::FarMemManager *manager, const char *name,
+<                 const far_memory::DataFrameVector<T> &data,
+---
+>     load_column(const char *name,
+>                 const std::vector<T> &data,
+629c625
+<     sort(far_memory::FarMemManager *manager, const char *name, sort_spec dir);
+---
+>     sort(const char *name, sort_spec dir);
+750,751c746
+<     groupby(far_memory::FarMemManager *manager,
+<             F &&func,
+---
+>     groupby(F &&func,
+759,760c754
+<     groupby_async(far_memory::FarMemManager *manager,
+<                   F &&func,
+---
+>     groupby_async(F &&func,
+1100,1102c1094,1096
+<     template <typename T>
+<     [[nodiscard]] far_memory::DataFrameVector<T> get_col_unique_values(
+<         far_memory::FarMemManager* manager, const char* name) const;
+---
+>     template<typename T>
+>     [[nodiscard]] std::vector<T>
+>     get_col_unique_values(const char *name) const;
+1116,1117c1110
+<     get_data_by_idx(far_memory::FarMemManager *manager,
+<                     Index2D<IndexType> range) const;
+---
+>     get_data_by_idx(Index2D<IndexType> range) const;
+1278,1281c1271,1273
+<     template <typename T, typename F, typename... Ts>
+<     [[nodiscard]] DataFrame get_data_by_sel(far_memory::FarMemManager* manager,
+<                                             const char* name,
+<                                             F& sel_functor) const;
+---
+>     template<typename T, typename F, typename ... Ts>
+>     [[nodiscard]] DataFrame
+>     get_data_by_sel(const char *name, F &sel_functor) const;
+2317,2318c2309
+<     _load_pair(far_memory::FarMemManager *manager,
+<                std::pair<T1, T2> &col_name_data);
+---
+>     _load_pair(std::pair<T1, T2> &col_name_data);
+2332c2323
+<     template<bool Ascending, typename T, typename ... Ts>
+---
+>     template<typename CF, typename ... Ts>
+2334,2335c2325
+<     sort_common_(far_memory::FarMemManager *manager, DataFrame<I, H> &df,
+<                  const T &vec);
+---
+>     sort_common_(DataFrame<I, H> &df, CF &&comp_func);
+diff -r AIFM/include/DataFrame/DataFrameStatsVisitors.h original/include/DataFrame/DataFrameStatsVisitors.h
+1754a1755,1756
+> template <typename T> concept Addable = requires(T x) { x + x; };
+> 
+1768,1783c1770,1779
+<         const size_type                         vec_size =
+<             std::distance(values_begin, values_end);
+<         KthValueVisitor<value_type, index_type> kv_visitor (vec_size >> 1);
+< 
+< 
+<         kv_visitor.pre();
+<         kv_visitor(idx_begin, idx_end, values_begin, values_end);
+<         kv_visitor.post();
+<         result_ = kv_visitor.get_result();
+<         if (! (vec_size & 0x0001))  { // even
+<             KthValueVisitor<value_type, I>   kv_visitor2 ((vec_size >> 1) + 1);
+< 
+<             kv_visitor2.pre();
+<             kv_visitor2(idx_begin, idx_end, values_begin, values_end);
+<             kv_visitor2.post();
+<             result_ = (result_ + kv_visitor2.get_result()) / value_type(2);
+---
+>         std::vector<typename H::value_type> tmp(values_begin, values_end);
+>         const size_type vec_size = tmp.size();
+>         std::nth_element(tmp.begin(), tmp.begin() + vec_size / 2, tmp.end());
+>         result_ = tmp[tmp.size() / 2];
+>         if constexpr (Addable<T>) {
+>             if (tmp.size() % 2 == 0) {
+>                 std::nth_element(tmp.begin(), tmp.begin() + tmp.size() / 2 - 1,
+>                                  tmp.end());
+>                 result_ = (result_ + tmp[tmp.size() / 2 - 1]) / 2;
+>             }
+diff -r AIFM/include/DataFrame/DataFrameTypes.h original/include/DataFrame/DataFrameTypes.h
+32,33d31
+< #include "dataframe_vector.hpp"
+< 
+323,324c321
+< struct type_declare<HeteroVector, U>  { using type =
+< 		far_memory::DataFrameVector<U>; };
+---
+> struct type_declare<HeteroVector, U>  { using type = std::vector<U>; };
+diff -r AIFM/include/DataFrame/Internals/DataFrame_functors.h original/include/DataFrame/Internals/DataFrame_functors.h
+32,33d31
+< #include "dataframe_vector.hpp"
+< 
+68,75c66,71
+<     inline sort_functor_ (far_memory::FarMemManager *m,
+<                           far_memory::DataFrameVector<unsigned long long> &si,
+<                           size_t is)
+<         : manager(m), sorted_idxs(si), idx_s(is)  {   }
+< 
+<     far_memory::FarMemManager                              *manager;
+<     far_memory::DataFrameVector<unsigned long long>&       sorted_idxs;
+<     const size_t                                           idx_s;
+---
+>     inline sort_functor_ (const std::vector<size_t> &si, size_t is)
+>         : sorted_idxs(si), idx_s(is)  {   }
+> 
+>     const std::vector<size_t>   &sorted_idxs;
+>     std::vector<size_t>         sorted_idxs_copy;
+>     const size_t                idx_s;
+86,87c82
+<     inline load_functor_ (far_memory::FarMemManager *m,
+<                           const char *n,
+---
+>     inline load_functor_ (const char *n,
+92c87
+<     : manager(m), name (n), begin (b), end (e), df(d), nan_p(np)  {   }
+---
+>     : name (n), begin (b), end (e), df(d), nan_p(np)  {   }
+94,99c89,93
+<     far_memory::FarMemManager *manager;
+<     const char                *name;
+<     const std::size_t         begin;
+<     const std::size_t         end;
+<     LHS                       &df;
+<     const nan_policy          nan_p;
+---
+>     const char          *name;
+>     const std::size_t   begin;
+>     const std::size_t   end;
+>     LHS                 &df;
+>     const nan_policy    nan_p;
+162,164c156,157
+<     inline add_col_functor_ (far_memory::FarMemManager *m, const char *n,
+<                              DataFrame &d)
+<         : manager(m), name (n), df(d)  {   }
+---
+>     inline add_col_functor_ (const char *n, DataFrame &d)
+>         : name (n), df(d)  {   }
+166d158
+<     far_memory::FarMemManager *manager;
+176c168
+< template<typename T, typename F, typename ... Ts>
+---
+> template<typename F, typename ... Ts>
+179,181c171,174
+<     inline groupby_functor_ (far_memory::FarMemManager *m,
+<                              const char *n,
+<                              const far_memory::DataFrameVector<T> &k,
+---
+>     inline groupby_functor_ (const char *n,
+>                              std::size_t b,
+>                              std::size_t e,
+>                              const IndexVecType &iv,
+184c177
+<         : manager(m), name(n), key_vec(k), functor(f), df(d) {  }
+---
+>         : name(n), begin(b), end(e), index_vec(iv), functor(f), df(d) {  }
+186,190c179,184
+<     far_memory::FarMemManager             *manager;
+<     const char                            *name;
+<     const far_memory::DataFrameVector<T>  &key_vec;
+<     F                                     &functor;
+<     DataFrame                             &df;
+---
+>     const char          *name;
+>     const std::size_t   begin;
+>     const std::size_t   end;
+>     const IndexVecType  &index_vec;
+>     F                   &functor;
+>     DataFrame           &df;
+192,193c186,187
+<     template<typename U>
+<     void operator() (const U &vec);
+---
+>     template<typename T>
+>     void operator() (const T &vec);
+475,477c469,470
+<     inline sel_load_functor_ (far_memory::FarMemManager *m,
+<                               const char *n,
+<                               far_memory::DataFrameVector<IT> &si,
+---
+>     inline sel_load_functor_ (const char *n,
+>                               const std::vector<IT> &si,
+480c473
+<         : manager(m), name (n), sel_indices (si), indices_size(is), df(d)  {   }
+---
+>         : name (n), sel_indices (si), indices_size(is), df(d)  {   }
+482,486c475,478
+<     far_memory::FarMemManager *manager;
+<     const char* name;
+<     far_memory::DataFrameVector<IT>& sel_indices;
+<     const size_type indices_size;
+<     DataFrame& df;
+---
+>     const char              *name;
+>     const std::vector<IT>   &sel_indices;
+>     const size_type         indices_size;
+>     DataFrame               &df;
+489c481
+<     void operator() (const far_memory::DataFrameVector<T> &vec);
+---
+>     void operator() (const std::vector<T> &vec);
+diff -r AIFM/include/DataFrame/Internals/DataFrame_get.tcc original/include/DataFrame/Internals/DataFrame_get.tcc
+30,31d29
+< #include "dataframe_vector.hpp"
+< 
+36d33
+< #include <cstdint>
+38d34
+< #include <memory>
+93c89
+<     return (hv.template get_existed_vector<T>());
+---
+>     return (hv.template get_vector<T>());
+163,168c159,196
+< template <typename I, typename H>
+< template <typename T>
+< far_memory::DataFrameVector<T> DataFrame<I, H>::get_col_unique_values(
+<     far_memory::FarMemManager* manager, const char* name) const
+< {
+<     return const_cast<DataFrame<I, H>*>(this)->get_column<T>(name).get_col_unique_values(manager);
+---
+> template<typename I, typename  H>
+> template<typename T>
+> std::vector<T> DataFrame<I, H>::
+> get_col_unique_values(const char *name) const  {
+> 
+>     const std::vector<T>    &vec = get_column<T>(name);
+>     auto                    hash_func =
+>         [](std::reference_wrapper<const T> v) -> std::size_t  {
+>             return(std::hash<T>{}(v.get()));
+>     };
+>     auto                    equal_func =
+>         [](std::reference_wrapper<const T> lhs,
+>            std::reference_wrapper<const T> rhs) -> bool  {
+>             return(lhs.get() == rhs.get());
+>     };
+> 
+>     std::unordered_set<
+>         typename std::reference_wrapper<T>::type,
+>         decltype(hash_func),
+>         decltype(equal_func)>   table(vec.size(), hash_func, equal_func);
+>     bool                        counted_nan = false;
+>     std::vector<T>              result;
+> 
+>     result.reserve(vec.size());
+>     for (auto citer : vec)  {
+>         if (_is_nan<T>(citer) && ! counted_nan)  {
+>             counted_nan = true;
+>             result.push_back(_get_nan<T>());
+>             continue;
+>         }
+> 
+>         const auto  insert_ret = table.emplace(std::ref(citer));
+> 
+>         if (insert_ret.second)
+>             result.push_back(citer);
+>     }
+> 
+>     return(result);
+199,204d226
+<     auto& vec                               = get_column<T>(name);
+<     const size_type idx_s                   = indices_.size();
+<     const size_type min_s                   = std::min<size_type>(vec.size(), idx_s);
+<     size_type i                             = 0;
+<     far_memory::DerefScope scope;
+<     constexpr uint64_t kNumElementsPerScope = 1024;
+206,207c228,231
+<     auto idx_it = indices_.cfbegin(scope);
+<     auto vec_it = vec.cfbegin(scope);
+---
+>     auto            &vec = get_column<T>(name);
+>     const size_type idx_s = indices_.size();
+>     const size_type min_s = std::min<size_type>(vec.size(), idx_s);
+>     size_type       i = 0;
+210,219c234,235
+<     for (; i < min_s; ++i) {
+<         if (unlikely(i % kNumElementsPerScope == 0)) {
+<             scope.renew();
+<             idx_it.renew(scope);
+<             vec_it.renew(scope);
+<         }
+<         visitor (*idx_it, *vec_it);
+<         ++idx_it;
+<         ++vec_it;
+< 	}
+---
+>     for (; i < min_s; ++i)
+>         visitor (indices_[i], vec[i]);
+221,224d236
+<         if (unlikely(i % kNumElementsPerScope == 0)) {
+<             scope.renew();
+<             idx_it.renew(scope);
+<         }
+226c238,239
+<         visitor (*idx_it, nan_val);
+---
+> 
+>         visitor (indices_[i], nan_val);
+729,734c742,746
+< template <typename I, typename H>
+< template <typename... Ts>
+< DataFrame<I, H> DataFrame<I, H>::get_data_by_idx(far_memory::FarMemManager* manager,
+<                                                  Index2D<IndexType> range) const
+< {
+<     assert(!far_memory::DerefScope::is_in_deref_scope());
+---
+> template<typename I, typename  H>
+> template<typename ... Ts>
+> DataFrame<I, H>
+> DataFrame<I, H>::get_data_by_idx (Index2D<IndexType> range) const  {
+> 
+736c748
+<         std::lower_bound (indices_.cbegin(), indices_.cend(), range.begin);
+---
+>         std::lower_bound (indices_.begin(), indices_.end(), range.begin);
+738,739c750,751
+<         std::upper_bound (indices_.cbegin(), indices_.cend(), range.end);
+<     DataFrame df(manager);
+---
+>         std::upper_bound (indices_.begin(), indices_.end(), range.end);
+>     DataFrame   df;
+741c753
+<     if (lower != indices_.cend()) {
+---
+>     if (lower != indices_.end())  {
+744,746c756,758
+<         const size_type b_dist = std::distance(indices_.cbegin(), lower);
+<         const size_type e_dist = std::distance(indices_.cbegin(),
+<                                                upper < indices_.cend()
+---
+>         const size_type b_dist = std::distance(indices_.begin(), lower);
+>         const size_type e_dist = std::distance(indices_.begin(),
+>                                                upper < indices_.end()
+748c760
+<                                                    : indices_.cend());
+---
+>                                                    : indices_.end());
+751,752c763
+<             load_functor_<DataFrame, Ts ...>    functor (manager,
+<                                                          iter.first.c_str(),
+---
+>             load_functor_<DataFrame, Ts ...>    functor (iter.first.c_str(),
+1060,1080c1071,1084
+< template <typename I, typename H>
+< template <typename T, typename F, typename... Ts>
+< DataFrame<I, H> DataFrame<I, H>::get_data_by_sel(far_memory::FarMemManager* manager,
+<                                                  const char* name, F& sel_functor) const
+< {
+<     constexpr uint64_t kNumElementsPerScope = 1024;
+<     auto& column_dataframe_vec              = get_column<T>(name);
+<     auto col_indices = manager->allocate_dataframe_vector<unsigned long long>();
+<     {
+<         far_memory::DerefScope scope;
+<         auto column_it = column_dataframe_vec.cfbegin(scope);
+<         for (unsigned long long i = 0; i < indices_.size(); ++i, ++column_it) {
+<             if (unlikely(i % kNumElementsPerScope == 0)) {
+<                 scope.renew();
+<                 column_it.renew(scope);
+<             }
+<             if (sel_functor(i, *column_it)) {
+<                 col_indices.push_back(scope, i);
+<             }
+<         }
+<     }
+---
+> template<typename I, typename  H>
+> template<typename T, typename F, typename ... Ts>
+> DataFrame<I, H> DataFrame<I, H>::
+> get_data_by_sel (const char *name, F &sel_functor) const  {
+> 
+>     const std::vector<T>    &vec = get_column<T>(name);
+>     const size_type         idx_s = indices_.size();
+>     const size_type         col_s = vec.size();
+>     std::vector<size_type>  col_indices;
+> 
+>     col_indices.reserve(idx_s / 2);
+>     for (size_type i = 0; i < col_s; ++i)
+>         if (sel_functor (indices_[i], vec[i]))
+>             col_indices.push_back(i);
+1082,1084c1086,1091
+<     DataFrame df(manager);
+<     auto new_index = const_cast<IndexVecType*>(&indices_)->
+<         copy_data_by_idx(manager, col_indices);
+---
+>     DataFrame       df;
+>     IndexVecType    new_index;
+> 
+>     new_index.reserve(col_indices.size());
+>     for (const auto citer: col_indices)
+>         new_index.push_back(indices_[citer]);
+1087d1093
+<     const size_type idx_s = indices_.size();
+1089,1090c1095
+<         sel_load_functor_<unsigned long long, Ts ...>    functor (
+<             manager,
+---
+>         sel_load_functor_<size_type, Ts ...>    functor (
+1099c1104
+<     return df;
+---
+>     return (df);
+diff -r AIFM/include/DataFrame/Internals/DataFrame_join.tcc original/include/DataFrame/Internals/DataFrame_join.tcc
+30,31d29
+< #include "dataframe_vector.hpp"
+< 
+245c243,296
+< 	BUG();
+---
+> 
+>     using left_idx_t = typename std::remove_reference<LHS_T>::type::IndexType;
+>     using right_idx_t = typename std::remove_reference<RHS_T>::type::IndexType;
+> 
+>     const size_type             jii_s = joined_index_idx.size();
+>     StdDataFrame<unsigned int>  result;
+> 
+>     // Load the new result index
+>     result.load_index(
+>         std::move(StdDataFrame<unsigned int>::gen_sequence_index(
+>                0, static_cast<unsigned int>(jii_s), 1)));
+> 
+>     // Load the lhs and rhs indices into two columns in the result
+>     // Also load the unified named column
+>     std::vector<left_idx_t>     lhs_index;
+>     std::vector<right_idx_t>    rhs_index;
+>     std::vector<T>              named_col_vec;
+>     const std::vector<T>        &lhs_named_col_vec =
+>         lhs.template get_column<T>(col_name);
+>     const std::vector<T>        &rhs_named_col_vec =
+>         rhs.template get_column<T>(col_name);
+> 
+>     lhs_index.reserve(jii_s);
+>     rhs_index.reserve(jii_s);
+>     named_col_vec.reserve(jii_s);
+>     for (const auto &citer : joined_index_idx)  {
+>         const size_type left_i = std::get<0>(citer);
+>         const size_type right_i = std::get<1>(citer);
+> 
+>         if (left_i != std::numeric_limits<size_type>::max())  {
+>             lhs_index.push_back(lhs.indices_[left_i]);
+>             named_col_vec.push_back(lhs_named_col_vec[left_i]);
+>         }
+>         else  {
+>             named_col_vec.push_back(rhs_named_col_vec[right_i]);
+>             lhs_index.push_back(DataFrame::_get_nan<left_idx_t>());
+>         }
+>         if (right_i != std::numeric_limits<size_type>::max())
+>             rhs_index.push_back(rhs.indices_[right_i]);
+>         else
+>             rhs_index.push_back(DataFrame::_get_nan<right_idx_t>());
+>     }
+> 
+>     char    buffer[64];
+> 
+>     ::sprintf(buffer, "lhs.%s", DF_INDEX_COL_NAME);
+>     result.load_column(buffer, std::move(lhs_index));
+>     ::sprintf(buffer, "rhs.%s", DF_INDEX_COL_NAME);
+>     result.load_column(buffer, std::move(rhs_index));
+>     result.load_column(col_name, std::move(named_col_vec));
+> 
+>     join_helper_common_<LHS_T, RHS_T, unsigned int, Ts ...>
+>         (lhs, rhs, joined_index_idx, result, col_name);
+>     return(result);
+diff -r AIFM/include/DataFrame/Internals/DataFrame_misc.tcc original/include/DataFrame/Internals/DataFrame_misc.tcc
+53c53
+<     vec.resize(size);
+---
+>     vec.resize(size, ValueType());
+82c82,83
+<     _sort_by_sorted_index_(manager, vec, sorted_idxs, idx_s);
+---
+>     sorted_idxs_copy = sorted_idxs;
+>     _sort_by_sorted_index_(vec, sorted_idxs_copy, idx_s);
+100d100
+<         manager,
+102,104c102
+<         Index2D<decltype(vec.cbegin())> {
+< 			    .begin = vec.cbegin() + begin,
+< 			    .end = vec.cbegin() + col_s },
+---
+>         { vec.begin() + begin, vec.begin() + col_s },
+167c165
+<     df.create_column<ValueType>(manager, name);
+---
+>     df.create_column<ValueType>(name);
+174,175c172,173
+< template<typename T, typename F, typename ... Ts>
+< template<typename U>
+---
+> template<typename F, typename ... Ts>
+> template<typename T>
+177c175
+< DataFrame<I, H>::groupby_functor_<T, F, Ts ...>::operator() (const U &vec)  {
+---
+> DataFrame<I, H>::groupby_functor_<F, Ts ...>::operator() (const T &vec)  {
+179c177,178
+<     auto agg_vec = manager->allocate_dataframe_vector<typename U::value_type>();
+---
+>     if (! ::strcmp(name, DF_INDEX_COL_NAME))  {
+>         auto    visitor = functor.template get_aggregator<I, I>();
+181,189c180,183
+<     if constexpr (std::is_same<F, GroupbyMax>::value) {
+<         agg_vec = const_cast<U *>(&vec)->aggregate_max(manager, key_vec);
+<     } else if constexpr (std::is_same<F, GroupbyMin>::value) {
+<         agg_vec = const_cast<U *>(&vec)->aggregate_min(manager, key_vec);
+<     } else if constexpr (std::is_same<F, GroupbyMedian>::value) {
+<         agg_vec = const_cast<U *>(&vec)->aggregate_median(manager, key_vec);
+<     } else {
+<         BUG();
+<     }
+---
+>         visitor.pre();
+>         visitor(index_vec.begin() + begin, index_vec.begin() + end,
+>                 index_vec.begin() + begin, index_vec.begin() + end);
+>         visitor.post();
+191,196c185
+<     if (! ::strcmp(name, DF_INDEX_COL_NAME))  {
+<         // If condition is always hold; it is used to avoid compilation errors when vec
+<         // is not index vector,
+<         if constexpr (std::is_same<I, typename decltype(agg_vec)::value_type>::value) {
+<             df.load_index(std::move(agg_vec));
+<         }
+---
+>         df.append_index(visitor.get_result());
+199,200c188,201
+<         df.load_column<typename U::value_type>(manager, name, std::move(agg_vec),
+<                                                nan_policy::dont_pad_with_nans);
+---
+>         using VecType = typename std::remove_reference<T>::type;
+>         using ValueType = typename VecType::value_type;
+> 
+>         auto                visitor =
+>             functor.template get_aggregator<ValueType, I>();
+>         const std::size_t   vec_end = std::min(end, vec.size());
+> 
+>         visitor.pre();
+>         visitor(index_vec.begin() + begin, index_vec.begin() + vec_end,
+>                 vec.begin() + begin, vec.begin() + vec_end);
+>         visitor.post();
+> 
+>         df.append_column<ValueType>(name, visitor.get_result(),
+>                                     nan_policy::dont_pad_with_nans);
+293,304c294,295
+< 
+<     far_memory::DerefScope scope;
+<     constexpr uint64_t kNumElementsPerScope = 1024;
+<     auto* _vec                              = const_cast<T*>(&vec);
+<     auto it                                 = _vec->cfbegin(scope);
+<     for (std::size_t i = 0; i < vec.size(); ++i, ++it) {
+<         if (unlikely(i % kNumElementsPerScope == 0)) {
+<             scope.renew();
+<             it.renew(scope);
+<         }
+<         os << *it << ',';
+< 	}
+---
+>     for (std::size_t i = 0; i < vec.size(); ++i)
+>         os << vec[i] << ',';
+363,372c354,355
+<         far_memory::DerefScope scope;
+<         constexpr uint64_t kNumElementsPerScope = 1024;
+<         auto* _vec                              = const_cast<T*>(&vec);
+<         auto it                                 = _vec->cfbegin(scope);
+<         _write_json_df_index_(os, *it);
+<         for (std::size_t i = 1; i < vec.size(); ++i, ++it)  {
+<             if (unlikely(i % kNumElementsPerScope == 0)) {
+<                 scope.renew();
+<                 it.renew(scope);
+<             }
+---
+>         _write_json_df_index_(os, vec[0]);
+>         for (std::size_t i = 1; i < vec.size(); ++i)  {
+374c357
+<             _write_json_df_index_(os, *it);
+---
+>             _write_json_df_index_(os, vec[i]);
+691c674,682
+< operator() (const far_memory::DataFrameVector<T> &vec)  {
+---
+> operator() (const std::vector<T> &vec)  {
+> 
+>     std::vector<T>  new_col;
+>     const size_type vec_size = vec.size();
+> 
+>     new_col.reserve(std::min(sel_indices.size(), vec_size));
+>     for (const auto citer : sel_indices)  {
+>         const size_type index =
+>             citer >= 0 ? citer : static_cast<IT>(indices_size) + citer;
+693,696c684,689
+<     auto new_col = const_cast<far_memory::DataFrameVector<T>*>(&vec)->
+<         copy_data_by_idx(manager, sel_indices);
+<     df.load_column<T>(manager, name, std::move(new_col),
+< 					  nan_policy::dont_pad_with_nans);
+---
+>         if (index < vec_size)
+>             new_col.push_back(vec[index]);
+>         else
+>             break;
+>     }
+>     df.load_column(name, std::move(new_col), nan_policy::dont_pad_with_nans);
+diff -r AIFM/include/DataFrame/Internals/DataFrame_read.tcc original/include/DataFrame/Internals/DataFrame_read.tcc
+30,32d29
+< #include "dataframe_vector.hpp"
+< #include "deref_scope.hpp"
+< 
+39d35
+< #include <memory>
+453,454c449
+< auto read_csv(far_memory::FarMemManager* manager, std::string csv_file_path,
+< 			  Strs... data_col_names)
+---
+> auto read_csv(std::string csv_file_path, Strs... data_col_names)
+457c452
+<     using DefaultIndexType          = unsigned long long;
+---
+>     using DefaultIndexType          = uint64_t;
+462,464c457,458
+<     StdDataFrame<IndexType> df(manager);
+<     auto vecs = io::parse_csv_to_vectors<ColTypes...>(manager, csv_file_path,
+< 													  data_col_names...);
+---
+>     StdDataFrame<IndexType> df;
+>     auto vecs = io::parse_csv_to_vectors<ColTypes...>(csv_file_path, data_col_names...);
+468c462
+<         auto index_vec = manager->allocate_dataframe_vector<IndexType>();
+---
+>         std::vector<IndexType> index_vec;
+474,475d467
+< 		far_memory::DerefScope scope;
+< 		auto kNumElementPerScope = 1024;
+477,480c469
+< 			if (unlikely((i % kNumElementPerScope) == 0)) {
+< 				scope.renew();
+< 			}
+<             index_vec.push_back(scope, i);
+---
+>             index_vec.push_back(i);
+487c476
+< 							   auto& vecs, auto strs)
+---
+> 							   auto &vecs, auto strs)
+490,491c479
+< 		  ? df.load_column(manager, std::get<ints>(strs),
+< 						   std::move(std::get<ints>(vecs)),
+---
+>               ? df.load_column(std::get<ints>(strs), std::move(std::get<ints>(vecs)),
+diff -r AIFM/include/DataFrame/Internals/DataFrame_set.tcc original/include/DataFrame/Internals/DataFrame_set.tcc
+30,33d29
+< #include "dataframe_vector.hpp"
+< #include "deref_scope.hpp"
+< #include "manager.hpp"
+< 
+37d32
+< #include <memory>
+46,48c41
+< far_memory::DataFrameVector<T> &
+< DataFrame<I, H>::create_column (far_memory::FarMemManager *manager,
+< 								const char *name)  {
+---
+> std::vector<T> &DataFrame<I, H>::create_column (const char *name)  {
+62c55
+<     auto& vec = hv.template get_vector<T>(manager);
+---
+>     std::vector<T>  &vec = hv.template get_vector<T>();
+158,159c151
+< DataFrame<I, H>::load_data (far_memory::FarMemManager *manager,
+<                             IndexVecType &&indices, Ts&& ... args)  {
+---
+> DataFrame<I, H>::load_data (IndexVecType &&indices, Ts&& ... args)  {
+169,170c161,162
+<         [manager, this, &cnt](auto &pa) mutable -> void {
+<             cnt += this->_load_pair(manager, pa);
+---
+>         [this, &cnt](auto &pa) mutable -> void {
+>             cnt += this->_load_pair(pa);
+189c181
+<     indices_.assign(begin, end);
+---
+>     indices_.insert (indices_.end(), begin, end);
+317,319c309,310
+< load_column (far_memory::FarMemManager *manager,
+<              const char *name,
+<              Index2D<const ITR>
+---
+> load_column (const char *name,
+>              Index2D<const ITR &>
+336a328
+> 
+338c330
+<     far_memory::DataFrameVector<T>* vec_ptr = nullptr;
+---
+>     std::vector<T>  *vec_ptr = nullptr;
+340,342c332,333
+<     if (iter == column_tb_.end()) {
+<         vec_ptr = &(create_column<T>(manager, name));
+<     }
+---
+>     if (iter == column_tb_.end())
+>         vec_ptr = &(create_column<T>(name));
+347c338
+<         vec_ptr = &(hv.template get_vector<T>(manager));
+---
+>         vec_ptr = &(hv.template get_vector<T>());
+351c342
+<     vec_ptr->assign (range.begin, range.end);
+---
+>     vec_ptr->insert (vec_ptr->end(), range.begin, range.end);
+357,358d347
+<         constexpr auto kNumEntriesPerScope = 1024;
+< 		far_memory::DerefScope scope;
+360,363c349
+<             if (unlikely(i % kNumEntriesPerScope == 0)) {
+<                 scope.renew();
+<             }
+<             vec_ptr->push_back (scope, std::move(_get_nan<T>()));
+---
+>             vec_ptr->push_back (std::move(_get_nan<T>()));
+398,399c384
+< load_column (far_memory::FarMemManager *manager, const char *name,
+< 			 far_memory::DataFrameVector<T> &&data, nan_policy padding)  {
+---
+> load_column (const char *name, std::vector<T> &&data, nan_policy padding)  {
+420,421d404
+<         constexpr auto kNumEntriesPerScope = 1024;
+< 		far_memory::DerefScope scope;
+423,426c406
+< 			if (unlikely(i % kNumEntriesPerScope == 0)) {
+<                 scope.renew();
+< 			}
+<             data.push_back(scope, std::move(_get_nan<T>()));
+---
+>             data.push_back (std::move(_get_nan<T>()));
+432c412
+<     far_memory::DataFrameVector<T>* vec_ptr = nullptr;
+---
+>     std::vector<T>  *vec_ptr = nullptr;
+435c415
+<         vec_ptr = &(create_column<T>(manager, name));
+---
+>         vec_ptr = &(create_column<T>(name));
+440c420
+<         vec_ptr = &(hv.template get_vector<T>(manager));
+---
+>         vec_ptr = &(hv.template get_vector<T>());
+510,511c490,491
+< load_column (far_memory::FarMemManager *manager, const char *name,
+<              const far_memory::DataFrameVector<T> &data,
+---
+> load_column (const char *name,
+>              const std::vector<T> &data,
+514,515c494
+<     return (load_column<T>(manager, name, { data.begin(), data.end() },
+< 						   padding));
+---
+>     return (load_column<T>(name, { data.begin(), data.end() }, padding));
+523,524c502
+< DataFrame<I, H>::_load_pair(far_memory::FarMemManager *manager,
+<                             std::pair<T1, T2> &col_name_data)  {
+---
+> DataFrame<I, H>::_load_pair(std::pair<T1, T2> &col_name_data)  {
+527d504
+<                 manager,
+diff -r AIFM/include/DataFrame/Internals/DataFrame_standalone.tcc original/include/DataFrame/Internals/DataFrame_standalone.tcc
+32,33d31
+< #include "dataframe_vector.hpp"
+< 
+39,41c37,38
+< _sort_by_sorted_index_(far_memory::FarMemManager *manager,
+<                        far_memory::DataFrameVector<T> &to_be_sorted,
+<                        far_memory::DataFrameVector<unsigned long long> &sorting_idxs,
+---
+> _sort_by_sorted_index_(std::vector<T> &to_be_sorted,
+>                        std::vector<size_t> &sorting_idxs,
+43c40,45
+<     auto tmp = to_be_sorted.shuffle_data_by_idx(manager, sorting_idxs);
+---
+> 
+>     std::vector<T> tmp;
+>     tmp.resize(sorting_idxs.size());
+>     for (uint64_t i = 0; i < sorting_idxs.size(); i++) {
+>         tmp[i] = to_be_sorted[sorting_idxs[i]];
+>     }
+diff -r AIFM/include/DataFrame/Internals/DataFrame.tcc original/include/DataFrame/Internals/DataFrame.tcc
+30,31d29
+< #include "manager.hpp"
+< 
+41d38
+< #include <type_traits>
+47,49d43
+< template <typename I, typename H>
+< DataFrame<I, H>::DataFrame(far_memory::FarMemManager* manager)
+<     : indices_(std::move(manager->allocate_dataframe_vector<I>())) {}
+52,54c46,47
+< template<bool Ascending, typename T, typename ... Ts>
+< void DataFrame<I, H>::sort_common_(far_memory::FarMemManager *manager,
+<                                    DataFrame<I, H> &df, const T &vec)  {
+---
+> template<typename CF, typename ... Ts>
+> void DataFrame<I, H>::sort_common_(DataFrame<I, H> &df, CF &&comp_func)  {
+57,58c50,53
+<     auto sorting_idxs = const_cast<T *>(&vec)->
+<         template get_sorted_indices<Ascending>(manager, false);
+---
+>     std::vector<size_type>  sorting_idxs(idx_s, 0);
+> 
+>     std::iota(sorting_idxs.begin(), sorting_idxs.end(), 0);
+>     std::sort(sorting_idxs.begin(), sorting_idxs.end(), comp_func);
+60c55
+<     sort_functor_<Ts ...>   functor (manager, sorting_idxs, idx_s);
+---
+>     sort_functor_<Ts ...>   functor (sorting_idxs, idx_s);
+64c59
+<     _sort_by_sorted_index_(manager, df.indices_, sorting_idxs, idx_s);
+---
+>     _sort_by_sorted_index_(df.indices_, sorting_idxs, idx_s);
+663,664c658
+< void DataFrame<I, H>::sort(far_memory::FarMemManager *manager,
+<                            const char *name, sort_spec dir)  {
+---
+> void DataFrame<I, H>::sort(const char *name, sort_spec dir)  {
+668a663,670
+>         auto    a = [this](size_type i, size_type j) -> bool  {
+>                         return (this->indices_[i] < this->indices_[j]);
+>                     };
+>         auto    d = [this](size_type i, size_type j) -> bool  {
+>                         return (this->indices_[i] > this->indices_[j]);
+>                     };
+> 
+> 
+670,671c672
+<             sort_common_<true, decltype(indices_), Ts ...>(manager,
+<                                                            *this, indices_);
+---
+>             sort_common_<decltype(a), Ts ...>(*this, std::move(a));
+673,674c674
+<             sort_common_<false, decltype(indices_), Ts ...>(manager,
+<                                                             *this, indices_);
+---
+>             sort_common_<decltype(d), Ts ...>(*this, std::move(d));
+677c677,684
+<         auto    &idx_vec = get_column<T>(name);
+---
+>         const std::vector<T>    &idx_vec = get_column<T>(name);
+> 
+>         auto    a = [&x = idx_vec](size_type i, size_type j) -> bool {
+>                         return (x[i] < x[j]);
+>                     };
+>         auto    d = [&x = idx_vec](size_type i, size_type j) -> bool {
+>                         return (x[i] > x[j]);
+>                     };
+680,683c687
+<             sort_common_<true,
+<                          typename std::remove_reference<decltype(idx_vec)>::type,
+<                          Ts ...>(
+<                  manager, *this, idx_vec);
+---
+>             sort_common_<decltype(a), Ts ...>(*this, std::move(a));
+685,688c689
+<             sort_common_<false,
+<                          typename std::remove_reference<decltype(idx_vec)>::type,
+<                          Ts ...>(
+<                  manager, *this, idx_vec);
+---
+>             sort_common_<decltype(d), Ts ...>(*this, std::move(d));
+1097,1098c1098
+< groupby (far_memory::FarMemManager *manager, F &&func, const char *gb_col_name,
+<          sort_state already_sorted) const  {
+---
+> groupby (F &&func, const char *gb_col_name, sort_state already_sorted) const  {
+1102,1104c1102,1110
+<     // Sort the whole dataframe by gb_col.
+<     if (already_sorted == sort_state::not_sorted)  {
+<         tmp_df.sort<T, Ts ...>(manager, gb_col_name, sort_spec::ascen);
+---
+>     if (already_sorted == sort_state::not_sorted)
+>         tmp_df.sort<T, Ts ...>(gb_col_name, sort_spec::ascen);
+> 
+>     DataFrame   result;
+> 
+>     for (const auto &iter : tmp_df.column_tb_)  {
+>         add_col_functor_<Ts ...>    functor (iter.first.c_str(), result);
+> 
+>         tmp_df.data_[iter.second].change(functor);
+1107c1113
+<     DataFrame   result(manager);
+---
+>     size_type   marker = 0;
+1109d1114
+<     // Do aggregation.
+1111,1118c1116,1130
+< 		auto gb_vec = get_index();
+<         groupby_functor_<I, F, Ts...> functor(manager, DF_INDEX_COL_NAME,
+<                                               gb_vec, func, result);
+< 		functor(gb_vec);
+< 
+<         for (const auto& iter : tmp_df.column_tb_) {
+<             groupby_functor_<I, F, Ts...> functor(manager, iter.first.c_str(),
+<                                                gb_vec, func, result);
+---
+>         const size_type vec_size = tmp_df.indices_.size();
+> 
+>         for (size_type i = 0; i < vec_size; ++i)  {
+>             if (tmp_df.indices_[i] != tmp_df.indices_[marker])  {
+>                 result.append_index(tmp_df.indices_[marker]);
+>                 for (const auto &iter : tmp_df.column_tb_)  {
+>                     groupby_functor_<F, Ts...>  functor(iter.first.c_str(),
+>                                                         marker,
+>                                                         i,
+>                                                         tmp_df.indices_,
+>                                                         func,
+>                                                         result);
+> 
+>                     tmp_df.data_[iter.second].change(functor);
+>                 }
+1120c1132,1146
+<             tmp_df.data_[iter.second].change(functor);
+---
+>                 marker = i;
+>             }
+>         }
+>         if (marker < vec_size)  {
+>             result.append_index(tmp_df.indices_[vec_size - 1]);
+>             for (const auto &iter : tmp_df.column_tb_)  {
+>                 groupby_functor_<F, Ts...>  functor(iter.first.c_str(),
+>                                                     marker,
+>                                                     vec_size,
+>                                                     tmp_df.indices_,
+>                                                     func,
+>                                                     result);
+> 
+>                 tmp_df.data_[iter.second].change(functor);
+>             }
+1124,1131c1150,1178
+<         const auto &gb_vec = tmp_df.get_column<T>(gb_col_name);
+<         groupby_functor_<T, F, Ts...> functor(manager, DF_INDEX_COL_NAME,
+<                                               gb_vec, func, result);
+< 		functor(get_index());
+< 
+<         for (const auto& iter : tmp_df.column_tb_) {
+<             groupby_functor_<T, F, Ts...> functor(manager, iter.first.c_str(),
+<                                               gb_vec, func, result);
+---
+>         const std::vector<T>    &gb_vec = tmp_df.get_column<T>(gb_col_name);
+>         const size_type         vec_size = gb_vec.size();
+> 
+>         for (size_type i = 0; i < vec_size; ++i)  {
+>             if (gb_vec[i] != gb_vec[marker])  {
+>                 groupby_functor_<F, IndexType>  ts_functor(DF_INDEX_COL_NAME,
+>                                                            marker,
+>                                                            i,
+>                                                            tmp_df.indices_,
+>                                                            func,
+>                                                            result);
+> 
+>                 ts_functor(tmp_df.indices_);
+>                 result.append_column<T>(gb_col_name,
+>                                         gb_vec [marker],
+>                                         nan_policy::dont_pad_with_nans);
+> 
+>                 for (const auto &iter : tmp_df.column_tb_)  {
+>                     if (iter.first != gb_col_name)  {
+>                         groupby_functor_<F, Ts...>  functor(iter.first.c_str(),
+>                                                             marker,
+>                                                             i,
+>                                                             tmp_df.indices_,
+>                                                             func,
+>                                                             result);
+> 
+>                         tmp_df.data_[iter.second].change(functor);
+>                     }
+>                 }
+1133c1180,1208
+<             tmp_df.data_[iter.second].change(functor);
+---
+>                 marker = i;
+>             }
+>         }
+> 
+>         if (marker < vec_size)  {
+>             groupby_functor_<F, IndexType>  ts_functor(DF_INDEX_COL_NAME,
+>                                                        marker,
+>                                                        vec_size,
+>                                                        tmp_df.indices_,
+>                                                        func,
+>                                                        result);
+> 
+>             ts_functor(tmp_df.indices_);
+>             result.append_column<T>(gb_col_name,
+>                                     gb_vec [vec_size - 1],
+>                                     nan_policy::dont_pad_with_nans);
+> 
+>             for (const auto &iter : tmp_df.column_tb_)  {
+>                 if (iter.first != gb_col_name)  {
+>                     groupby_functor_<F, Ts...>  functor(iter.first.c_str(),
+>                                                         marker,
+>                                                         vec_size,
+>                                                         tmp_df.indices_,
+>                                                         func,
+>                                                         result);
+> 
+>                     tmp_df.data_[iter.second].change(functor);
+>                 }
+>             }
+1145,1146c1220
+< DataFrame<I, H>::groupby_async (far_memory::FarMemManager *manager,
+<                                 F &&func,
+---
+> DataFrame<I, H>::groupby_async (F &&func,
+1152d1225
+<                            manager,
+diff -r AIFM/include/DataFrame/Internals/DataFrame_write.tcc original/include/DataFrame/Internals/DataFrame_write.tcc
+42a43
+> 
+100,103d100
+<         far_memory::DerefScope scope;
+<         constexpr uint64_t kNumElementsPerScope = 1024;
+<         auto* indices                           = const_cast<IndexVecType*>(&indices_);
+< 
+106,113c103,105
+<             if (! indices->empty())  {
+<                 auto it = indices->cfbegin(scope);
+<                 _write_json_df_index_(o, *it);
+<                 for (size_type i = 1; i < indices->size(); ++i, ++it)  {
+<                     if (unlikely(i % kNumElementsPerScope == 0)) {
+<                         scope.renew();
+<                         it.renew(scope);
+<                     }
+---
+>             if (! indices_.empty())  {
+>                 _write_json_df_index_(o, indices_[0]);
+>                 for (size_type i = 1; i < indices_.size(); ++i)  {
+115c107
+<                     _write_json_df_index_(o, *it);
+---
+>                     _write_json_df_index_(o, indices_[i]);
+122,129c114,115
+<             auto it = indices->cfbegin(scope);
+<             for (size_type i = 0; i < indices->size(); ++i, ++it) {
+<                 if (unlikely(i % kNumElementsPerScope == 0)) {
+<                     scope.renew();
+<                     it.renew(scope);
+<                 }
+<                 _write_csv_df_index_(o, *it) << ',';
+<             }
+---
+>             for (size_type i = 0; i < indices_.size(); ++i)
+>                 _write_csv_df_index_(o, indices_[i]) << ',';
+155c141,142
+<     if (iof == io_format::json) o << "\n}";
+---
+>     if (iof == io_format::json)
+>         o << "\n}";
+diff -r AIFM/include/DataFrame/Vectors/HeteroVector.h original/include/DataFrame/Vectors/HeteroVector.h
+32,34d31
+< #include "dataframe_vector.hpp"
+< #include "manager.hpp"
+< 
+64,75c61,64
+<     template <typename T>
+<     far_memory::DataFrameVector<T>& get_existed_vector();
+<     template <typename T>
+<     const far_memory::DataFrameVector<T>&
+< 	get_existed_vector() const;
+< 	
+<     template <typename T>
+<     far_memory::DataFrameVector<T>&
+< 	get_vector(far_memory::FarMemManager *manager);
+<     template <typename T>
+<     const far_memory::DataFrameVector<T>&
+< 	get_vector(far_memory::FarMemManager *manager) const;
+---
+>     template<typename T>
+>     std::vector<T> &get_vector();
+>     template<typename T>
+>     const std::vector<T> &get_vector() const;
+96c85
+<     void reserve (size_type r)  { get_existed_vector<T>().reserve (r); }
+---
+>     void reserve (size_type r)  { get_vector<T>().reserve (r); }
+98c87
+<     void shrink_to_fit () { get_existed_vector<T>().shrink_to_fit (); }
+---
+>     void shrink_to_fit () { get_vector<T>().shrink_to_fit (); }
+101c90
+<     size_type size () const { return (get_existed_vector<T>().size()); }
+---
+>     size_type size () const { return (get_vector<T>().size()); }
+134,135d122
+< 	template <typename T>
+< 	class NotImplemented {};
+137c124
+<     using iterator = NotImplemented<T>;
+---
+>     using iterator = typename std::vector<T>::iterator;
+139c126
+<     using const_iterator = NotImplemented<T>;
+---
+>     using const_iterator = typename std::vector<T>::const_iterator;
+141c128
+<     using reverse_iterator = NotImplemented<T>;
+---
+>     using reverse_iterator = typename std::vector<T>::reverse_iterator;
+143c130,131
+<     using const_reverse_iterator = NotImplemented<T>;
+---
+>     using const_reverse_iterator =
+>         typename std::vector<T>::const_reverse_iterator;
+147,149c135
+<     begin() noexcept {
+<         BUG();
+<     }
+---
+>     begin() noexcept { return (get_vector<T>().begin()); }
+153,155c139
+<     end() noexcept {
+<         BUG();
+<     }
+---
+>     end() noexcept { return (get_vector<T>().end()); }
+159,161c143
+<     begin () const noexcept {
+<         BUG();
+<     }
+---
+>     begin () const noexcept { return (get_vector<T>().begin()); }
+165,167c147
+<     end () const noexcept {
+<         BUG();
+<     }
+---
+>     end () const noexcept { return (get_vector<T>().end()); }
+171,173c151
+<     rbegin() noexcept {
+<         BUG();
+<     }
+---
+>     rbegin() noexcept { return (get_vector<T>().rbegin()); }
+177,179c155
+<     rend() noexcept {
+<         BUG();
+<     }
+---
+>     rend() noexcept { return (get_vector<T>().rend()); }
+183,185c159
+<     rbegin () const noexcept {
+<         BUG();
+<     }
+---
+>     rbegin () const noexcept { return (get_vector<T>().rbegin()); }
+189,191c163
+<     rend () const noexcept {
+<         BUG();
+<     }
+---
+>     rend () const noexcept { return (get_vector<T>().rend()); }
+196,197c168
+<     inline static std::unordered_map<const HeteroVector *,
+< 									 far_memory::DataFrameVector<T>>
+---
+>     inline static std::unordered_map<const HeteroVector *, std::vector<T>>
+diff -r AIFM/include/DataFrame/Vectors/HeteroVector.tcc original/include/DataFrame/Vectors/HeteroVector.tcc
+30,31d29
+< #include "manager.hpp"
+< 
+42,53c40
+< far_memory::DataFrameVector<T> &
+< HeteroVector::get_existed_vector()  {
+< 
+<     auto    iter = vectors_<T>.find (this);
+< 	BUG_ON(iter == vectors_<T>.end());
+< 
+<     return (iter->second);
+< }
+< 	
+< template<typename T>
+< far_memory::DataFrameVector<T> &
+< HeteroVector::get_vector(far_memory::FarMemManager *manager)  {
+---
+> std::vector<T> &HeteroVector::get_vector()  {
+66,68c53
+< 				auto from_iter = vectors_<T>.find(&from);
+< 				BUG_ON(from_iter == vectors_<T>.end());
+< 				vectors_<T>.insert_or_assign(&to, from_iter->second);
+---
+>                 vectors_<T>[&to] = vectors_<T>[&from];
+73,76c58,59
+< 				auto from_iter = vectors_<T>.find(&from);
+< 				BUG_ON(from_iter == vectors_<T>.end());
+< 				vectors_<T>.insert_or_assign(&to, std::move(from_iter->second));
+< 				vectors_<T>.erase(from_iter);
+---
+>                 vectors_<T>[&to] = std::move(vectors_<T>[&from]);
+>                 vectors_<T>.erase(vectors_<T>.find(&from));
+79,80c62
+<         iter = vectors_<T>.emplace (this,
+< 									manager->allocate_dataframe_vector<T>()).first;
+---
+>         iter = vectors_<T>.emplace (this, std::vector<T>()).first;
+90c72,76
+< 	BUG();
+---
+> 
+>     std::vector<T>  &vec = get_vector<T>();
+> 
+>     return (HeteroView(
+>         &(vec[begin]), end == size_t(-1) ? &(vec.back()) : &(vec[end])));
+97c83,88
+< 	BUG();
+---
+> 
+>     std::vector<T>  &vec = get_vector<T>();
+> 
+>     return (HeteroPtrView(
+>         &(*(vec.begin() + begin)),
+>         end == size_type(-1) ? &(*(vec.end())) : &(*(vec.begin() + end))));
+103,104c94
+< const far_memory::DataFrameVector<T> &
+< HeteroVector::get_vector(far_memory::FarMemManager *manager) const  {
+---
+> const std::vector<T> &HeteroVector::get_vector() const  {
+106,112c96
+<     return (const_cast<HeteroVector *>(this)->get_vector<T>(manager));
+< }
+< 
+< template <typename T>
+< const far_memory::DataFrameVector<T>& HeteroVector::get_existed_vector() const
+< {
+<     return (const_cast<HeteroVector*>(this)->get_existed_vector<T>());
+---
+>     return (const_cast<HeteroVector *>(this)->get_vector<T>());
+140c124,129
+< 	BUG();
+---
+> 
+>     auto    iter = vectors_<U>.find (this);
+> 
+>     if (iter != vectors_<U>.end())
+>         for (auto &&element : iter->second)
+>             visitor(element);
+147c136,141
+< 	BUG();
+---
+> 
+>     const auto  citer = vectors_<U>.find (this);
+> 
+>     if (citer != vectors_<U>.end())
+>         for (auto &&element : citer->second)
+>             visitor(element);
+154c148,152
+< 	BUG();
+---
+> 
+>     auto    iter = vectors_<U>.find (this);
+> 
+>     if (iter != vectors_<U>.end())
+>         std::sort (iter->second.begin(), iter->second.end(), functor);
+diff -r AIFM/include/simple_time.hpp original/include/simple_time.hpp
+81,85d80
+< 
+<     bool operator!=(const SimpleTime& o) const
+<     {
+<         return !operator==(o);
+<     }
+87,97d81
+< 
+< template <> struct std::hash<SimpleTime> {
+<     size_t operator()(const SimpleTime& simple_time) const
+<     {
+<         uint64_t hash = 0;
+<         static_assert(sizeof(simple_time) <= sizeof(hash));
+<         __builtin_memcpy(&hash, &simple_time, sizeof(simple_time));
+<         return hash;
+<     }
+< };
+< 
+diff -r AIFM/src/Vectors/HeteroVector.cc original/src/Vectors/HeteroVector.cc
+47c47,48
+< HeteroVector::HeteroVector (HeteroVector &&that) noexcept  { *this = std::move(that); }
+---
+> HeteroVector::HeteroVector (HeteroVector &&that) noexcept { *this = std::move(that); }
+> 
+diff -r AIFM/test/dataframe_tester_2.cc original/test/dataframe_tester_2.cc
+949c949
+<     test_groupby();
+---
+>     test_groupby();	

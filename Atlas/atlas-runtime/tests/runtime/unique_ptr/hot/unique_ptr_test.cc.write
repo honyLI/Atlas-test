@@ -1,0 +1,148 @@
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+#include <memory>
+
+#include "pointer.h"
+#include "runtime.h"
+#include <bks_types.h>
+#include <chrono>
+#include <gtest/gtest.h>
+#include <stdlib.h>
+#include <string.h>
+#include <thread>
+#include <vector>
+
+#include <iostream>
+
+using namespace std;
+
+#define ACCESS_ONCE(x) (*(volatile typeof(x) *)&(x))
+
+using Data_t = uint64_t;
+
+constexpr uint64_t kWorkSetSize = 1ULL << 30; // 1 GB.
+constexpr uint64_t kNumEntries = kWorkSetSize / sizeof(Data_t);
+constexpr uint64_t kMeasureTimes = 1 << 20;      // 1 million times.
+constexpr uint64_t kRawMemoryAccessCycles = 170; // 1 million times.
+
+unsigned cycles_low_start, cycles_high_start;
+unsigned cycles_low_end, cycles_high_end;
+uint32_t g_seed = 0xDEADBEEF;
+//atlas::AtlasUniquePtr<Data_t> ptrs[kNumEntries];
+std::vector<uint64_t> durations;
+
+uint32_t x = 123456789, y = 362436069, z = 521288629;
+
+
+typedef unsigned long uint64_t;
+void timer_start(unsigned *cycles_high_start,
+    unsigned *cycles_low_start) {
+asm volatile("xorl %%eax, %%eax\n\t"
+"CPUID\n\t"
+"RDTSC\n\t"
+"mov %%edx, %0\n\t"
+"mov %%eax, %1\n\t"
+: "=r"(*cycles_high_start), "=r"(*cycles_low_start)::"%rax",
+"%rbx", "%rcx", "%rdx");
+}
+
+void timer_end(unsigned *cycles_high_end,
+  unsigned *cycles_low_end) {
+asm volatile("RDTSCP\n\t"
+"mov %%edx, %0\n\t"
+"mov %%eax, %1\n\t"
+"xorl %%eax, %%eax\n\t"
+"CPUID\n\t"
+: "=r"(*cycles_high_end), "=r"(*cycles_low_end)::"%rax", "%rbx",
+"%rcx", "%rdx");
+}
+
+uint64_t get_elapsed_cycles(unsigned cycles_high_start,
+    unsigned cycles_low_start,
+    unsigned cycles_high_end,
+    unsigned cycles_low_end) {
+uint64_t start, end;
+start = ((static_cast<uint64_t>(cycles_high_start) << 32) | cycles_low_start);
+end = ((static_cast<uint64_t>(cycles_high_end) << 32) | cycles_low_end);
+return end - start;
+}
+
+
+uint32_t xorshf96(void) {
+  uint32_t t;
+  x ^= x << 16;
+  x ^= x >> 5;
+  x ^= x << 1;
+
+  t = x;
+  x = y;
+  y = z;
+  z = t ^ x ^ y;
+
+  return z;
+}
+
+template <typename T> void print_percentile(int percentile, T *container) {
+    auto idx = percentile / 100.0 * container->size();
+    cout << percentile << "\t" << (*container)[idx] << endl;
+  }
+  
+template <typename T> void print_results(T *container) {
+    sort(container->begin(), container->end());
+    print_percentile(90, container);
+}
+
+void test(){
+  atlas::AtlasUniquePtr<int> ptr;
+  int a = 67;
+  runtime_init();
+  ptr.reset_t(&a);
+  int * p = ptr.deref_get();
+  cout << *p << endl;
+  *p = 12;
+  p = ptr.deref_get();
+  cout << *p << endl;
+  runtime_exit();
+    return ;    
+}
+
+void do_work() { 
+    std::vector<atlas::AtlasUniquePtr<Data_t>> ptrs(kNumEntries);
+    Data_t *buffer =reinterpret_cast<Data_t *>(aligned_alloc(4096, kWorkSetSize));
+    memset(buffer, 0,kWorkSetSize);
+    for (size_t i = 0; i < kNumEntries; i++) {
+        ptrs[i].reset_t(buffer + i);
+    }
+    for (long i = kNumEntries - 1; i >= 0; i--) {
+        buffer[i] = i;
+    }
+
+  runtime_init();
+  
+  for (uint64_t i = 0; i < kMeasureTimes; i++) {
+    auto idx = xorshf96() % kNumEntries;
+    timer_start(&cycles_high_start, &cycles_low_start);
+    {
+        Data_t *raw_const_ptr = ptrs[idx].deref_get();
+        ACCESS_ONCE(*raw_const_ptr) = 0xDEADBEEFDEADBEEFULL;
+        //ACCESS_ONCE(*raw_const_ptr);
+    }
+    timer_end(&cycles_high_end, &cycles_low_end);
+    auto duration = get_elapsed_cycles(cycles_high_start, cycles_low_start, cycles_high_end, cycles_low_end);
+    if (duration > kRawMemoryAccessCycles) {
+        durations.push_back(duration);
+      }
+  }
+  print_results(&durations);
+  runtime_exit();
+  free(buffer);
+}
+
+int main(int argc, char *argv[]) {
+    //test();
+  do_work();
+  return 0;
+}
